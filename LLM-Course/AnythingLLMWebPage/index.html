@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>AnythingLLM 文档上传</title>
+</head>
+<body>
+<h2>上传文档到 AnythingLLM</h2>
+<label>文件：<input type="file" id="fileInput"></label><br><br>
+<label>Workspaces (逗号分隔)：<input type="text" id="workspaces" style="width:300px"></label><br><br>
+<label>Metadata (JSON，可选)：<input type="text" id="metadata" style="width:300px"></label><br><br>
+<button id="uploadBtn">上传</button>
+<pre id="result" style="margin-top:20px;border:1px solid #ccc;padding:10px;min-height:100px;white-space:pre-wrap;"></pre>
+<script>
+const API_KEY = 'XZE4144-3NCMD6F-MAZHQWY-814JNMQ';
+document.getElementById('uploadBtn').addEventListener('click', async () => {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) { alert('请选择文件'); return; }
+  const result = document.getElementById('result');
+  result.textContent = '上传中...';
+  const formData = new FormData();
+  formData.append('file', file);
+  const ws = document.getElementById('workspaces').value.trim();
+  if (ws) formData.append('addToWorkspaces', ws);
+  const md = document.getElementById('metadata').value.trim();
+  if (md) formData.append('metadata', md);
+  try {
+    const res = await fetch('http://localhost:3001/api/v1/document/upload', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${API_KEY}` },
+      body: formData
+    });
+    const text = await res.text();
+    result.textContent = `状态: ${res.status}\n${text}`;
+  } catch (e) {
+    result.textContent = '错误: ' + e.message;
+  }
+});
+</script>
+</body>
+</html>
