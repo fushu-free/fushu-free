@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "Bazi-MCP": {
+      "type": "streamable_http",
+      "url": "https://mcp.api-inference.modelscope.net/4442c72abf0947/mcp",
+      "headers": {
+        "Authorization": "Bearer ms-93bb099a-78cc-42cf-898a-d65d496c27fb"
+      }
+    },
+    "Local-MCP": {
+      "type": "streamable_http",
+      "url": "http://127.0.0.1:8090/mcp"
+    },
+    "Local-MCP-8091": {
+      "type": "streamable_http",
+      "url": "http://127.0.0.1:8091/mcp"
+    }
+  }
+}

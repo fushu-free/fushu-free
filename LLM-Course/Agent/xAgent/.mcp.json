@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "Bazi-MCP": {
+      "type": "streamable_http",
+      "url": "http://127.0.0.1:8090/mcp"
+    },
+    "Local-MCP": {
+      "type": "streamable_http",
+      "url": "http://127.0.0.1:8090/mcp"
+    }
+  }
+}

@@ -1,0 +1,140 @@
+%% chatfile.py 代码框架图
+%% 查看方式：支持 Mermaid 的编辑器预览，或使用 mmdc 渲染：
+%% mmdc -i chatfile_framework.mmd -o chatfile_framework.svg
+
+flowchart TB
+    subgraph ENTRY["程序入口 / 主循环"]
+        MAIN["__main__<br/>input 读取用户问题"]
+        MSG["messages<br/>对话上下文"]
+    end
+
+    subgraph CONFIG["配置"]
+        CONFIGFILE[("config.ini<br/>base_url / api_key<br/>model / temperature / max_tokens")]
+        LOADCFG["load_config()<br/>读取并返回 [llm] 配置"]
+    end
+
+    subgraph LLM["LLM 流式对话"]
+        STREAM["stream_chat()<br/>POST /chat/completions<br/>解析 SSE data: 流"]
+        TC["tool_calls<br/>按 index 拼接 name / arguments"]
+        API["OpenAI 兼容接口<br/>本地或远程 LLM 服务"]
+    end
+
+    subgraph DISPATCH["工具调度"]
+        RUN["run_tool(name, arguments)<br/>JSON 解析 + 分发 + 异常捕获<br/>统一返回 JSON 字符串"]
+    end
+
+    subgraph TOOLS["Function Call 工具定义（TOOLS）"]
+        direction LR
+        subgraph BASIC["通用工具"]
+            T1["getDate<br/>获取日期时间"]
+            T2["isLeapYear<br/>判断闰年"]
+        end
+        subgraph FILE["本地文件操作工具"]
+            T3["getCurrentWorkingDirectory<br/>获取工作目录"]
+            T4["listDirectory<br/>列出目录内容"]
+            T5["getFileType<br/>获取文件类型"]
+            T6["readTextFile<br/>读取纯文本文件"]
+            T7["createFile<br/>创建文件"]
+            T8["editFileContent<br/>编辑文件内容"]
+            T9["createDirectory<br/>创建目录"]
+            T10["deleteDirectory<br/>递归删除目录"]
+            T11["deleteFile<br/>删除文件"]
+            T12["renamePath<br/>重命名文件/目录"]
+        end
+    end
+
+    subgraph IMPL["工具实现函数"]
+        direction LR
+        F1["get_date()"]
+        F2["is_leap_year()"]
+        F3["get_current_working_directory()"]
+        F4["list_directory()"]
+        F5["get_file_type()"]
+        F6["read_text_file()"]
+        F7["create_file()"]
+        F8["edit_file_content()"]
+        F9["create_directory()"]
+        F10["delete_directory()"]
+        F11["delete_file()"]
+        F12["rename_path()"]
+    end
+
+    subgraph HELPERS["公共辅助函数与常量"]
+        direction LR
+        H1["_resolve()<br/>展开用户目录并转绝对路径"]
+        H2["_is_text_file()<br/>扩展名 / MIME / 字节判别"]
+        H3["_read_text()<br/>多编码逐级尝试读取"]
+        H4["_write_text()<br/>UTF-8 写入（覆盖/追加）"]
+        H5["TEXT_EXTENSIONS<br/>TEXT_MIME_TYPES"]
+    end
+
+    subgraph SYSTEM["本地系统能力"]
+        OS1["os / pathlib / shutil / mimetypes"]
+        OS2["subprocess<br/>系统 date / time 命令"]
+    end
+
+    CONFIGFILE --> LOADCFG
+    LOADCFG --> MAIN
+    MAIN --> MSG
+    MAIN -->|调用| STREAM
+    MSG --> STREAM
+    STREAM --> API
+    STREAM --> TC
+    STREAM -->|返回 answer| MAIN
+    TC --> RUN
+    RUN -.->|工具结果写入 role=tool| MSG
+
+    RUN --> T1
+    RUN --> T2
+    RUN --> T3
+    RUN --> T4
+    RUN --> T5
+    RUN --> T6
+    RUN --> T7
+    RUN --> T8
+    RUN --> T9
+    RUN --> T10
+    RUN --> T11
+    RUN --> T12
+
+    T1 --> F1
+    T2 --> F2
+    T3 --> F3
+    T4 --> F4
+    T5 --> F5
+    T6 --> F6
+    T7 --> F7
+    T8 --> F8
+    T9 --> F9
+    T10 --> F10
+    T11 --> F11
+    T12 --> F12
+
+    F1 --> OS2
+    F2 --> OS1
+    F3 --> OS1
+    F4 --> H1
+    F4 --> OS1
+    F5 --> H1
+    F5 --> H2
+    F6 --> H1
+    F6 --> H2
+    F6 --> H3
+    F7 --> H1
+    F7 --> H4
+    F7 --> OS1
+    F8 --> H1
+    F8 --> H2
+    F8 --> H3
+    F8 --> H4
+    F9 --> H1
+    F9 --> OS1
+    F10 --> H1
+    F10 --> OS1
+    F11 --> H1
+    F11 --> OS1
+    F12 --> H1
+    F12 --> OS1
+    H1 --> OS1
+    H2 --> H5
+    H4 --> OS1
